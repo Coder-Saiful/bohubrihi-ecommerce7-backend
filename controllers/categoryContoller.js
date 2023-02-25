@@ -4,10 +4,10 @@ const _ = require('lodash');
 module.exports.createCategory = async (req, res) => {
     try {
         const { error } = validate(_.pick(req.body, ["name"]));
-        if (error) return res.status(400).send({ message: error.details[0].message + "!" });
+        if (error) return res.status(400).send({ categoryName: error.details[0].message + "!" });
 
         let category = await Category.findOne({ name: req.body.name });
-        if (category ) return res.status(400).send({ message: "Category already taken!" });
+        if (category ) return res.status(400).send({ categoryName: "Category already taken!" });
 
         category = new Category(_.pick(req.body, ["name"]));
 

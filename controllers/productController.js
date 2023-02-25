@@ -45,7 +45,7 @@ module.exports.createProduct = async (req, res) => {
                         }
                     });
                 } else {
-                    return res.status(400).send({ message: "No image provided!" });
+                    return res.status(400).send({ noImage: "No image provided!" });
                 }
             }
         }
@@ -57,8 +57,8 @@ module.exports.getProducts = async (req, res) => {
     try {
         if (await Product.count() > 0) {
             const order = req.query.order === "desc" ? -1: 1;
-            const sortBy = req.query.sortBy ? req.query.sortBy : "_id";
-            const limit = req.query.limit ?  parseInt(req.query.limit) : 10;
+            const sortBy = req.query.sortBy ? req.query.sortBy : "createdAt";
+            const limit = req.query.limit ?  parseInt(req.query.limit) : 0;
             const products = await Product.find()
                 .select({photo: 0})
                 .sort({[sortBy]: order})
@@ -154,46 +154,54 @@ module.exports.deleteProduct = async (req, res) => {
         const product = await Product.findByIdAndDelete(productId);
         if (!product) return res.status(400).send({ message: "Product deleted failed!" });
         return res.status(200).send({ message: "Product deleted successfully!" });
-    } catch (error) {
-        return res.status(400).send({ message: "Product deleted failed!" });
-    }
-}
-
-// Filter by any fields
-
-module.exports.filterProducts = async (req, res) => {
-    const order = req.body.order === "desc" ? -1: 1;
-    const sortBy = req.body.sortBy ? req.query.sortBy : "_id";
-    const limit = req.body.limit ?  parseInt(req.query.limit) : 10;
-    const skip = parseInt(req.body.skip);
-    const filters = req.body.filters;
-    const args = {};
-
-    for (const key in filters) {
-        if (filters[key].length > 0) {
-            switch(key) {
-                case 'price':
-                    args.price = {
-                        $gte: filters.price[0],
-                        $lte: filters.price[1]
-                    }
-                    break;
-                case 'category':
-                    args.category = {
-                        $in: filters.category
-                    }
-                    break;
-                default:
-                    return;
-            }
+        } catch (error) {
+            return res.status(400).send({ message: "Product deleted failed!" });
         }
     }
 
-    const products = await Product.find(args)
-        .select({photo: 0})
-        .populate('category', 'name')
-        .sort({[sortBy]: order})
-        .limit(limit)
-        .skip(skip);
-    return res.status(200).send(products);
+    // Filter by any fields
+
+    module.exports.filterProducts = async (req, res) => {
+        try {
+            const order = req.body.order === "desc" ? -1: 1;
+        const sortBy = req.body.sortBy ? req.query.sortBy : "_id";
+        const limit = req.body.limit ?  parseInt(req.query.limit) : 10;
+        const skip = parseInt(req.body.skip);
+        const filters = req.body.filters;
+        const args = {};
+
+        for (const key in filters) {
+            if (filters[key].length > 0) {
+                switch(key) {
+                    case 'price':
+                        args.price = {
+                            $gte: filters.price[0],
+                            $lte: filters.price[1]
+                        }
+                        break;
+                    case 'category':
+                        args.category = {
+                            $in: filters.category
+                        }
+                        break;
+                    default:
+                        return;
+                }
+            }
+        }
+
+        const products = await Product.find(args)
+            .select({photo: 0})
+            .populate('category', 'name')
+            .sort({[sortBy]: order})
+            .limit(limit)
+            .skip(skip);
+        if (products.length > 0) {
+            return res.status(200).send(products);
+        } else {
+            return res.status(200).send({message: "No product available!"});
+        }
+    } catch (error) {
+        return res.status(400).send({message: "Failed to load products!"});
+    }
 }
