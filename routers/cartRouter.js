@@ -5,7 +5,7 @@ const authorize = require('../middlewares/authorize');
 router.route('/')
     .post(authorize, createCartItem)
     .get(authorize, getCartItem)
-    .put(authorize, deleteCartItem);
+    .put(authorize, updateCartItem);
 
 router.route('/:id')
     .delete(authorize, deleteCartItem);
