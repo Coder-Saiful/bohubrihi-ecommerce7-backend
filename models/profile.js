@@ -1,6 +1,6 @@
 const {Schema, model} = require('mongoose');
 
-module.exports.Profile = Schema({
+module.exports.Profile = Schema('Profile', {
     user: {
         type: Schema.Types.ObjectId,
         ref: "User",
