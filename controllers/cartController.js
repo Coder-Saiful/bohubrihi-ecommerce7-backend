@@ -53,7 +53,7 @@ module.exports.updateCartItem = async (req, res) =>  {
 // delete cart item
 module.exports.deleteCartItem = async (req, res) =>  {
     try {
-        const _id = req.params._id;
+        const _id = req.params.id;
         await Cart.deleteOne({user: req.user._id, _id: _id});
         return res.status(200).send({message: "Your cart item removed successfully!"});
     } catch (error) {
