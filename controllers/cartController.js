@@ -43,7 +43,7 @@ module.exports.getCartItem = async (req, res) =>  {
 module.exports.updateCartItem = async (req, res) =>  {
     try {
         const {_id, count} = _.pick(req.body, ["_id", "count"]);
-        await Cart.findOne({user: req.user._id, _id: _id}, {count: count});
+        await Cart.updateOne({user: req.user._id, _id: _id}, {count: count});
         return res.status(200).send({message: "Your cart item updated!"});
     } catch (error) {
         return res.status(400).send({message: "Cart item updated failed."});
